@@ -279,9 +279,9 @@ public class Huffman {
 
     public static void main(String[] args) throws IOException {
         //FILE PATHS
-        String filePath = "src/datasets/artificial"; //File path for file to be compressed
-        String compressedFilePath = "src/datasets/artificial.bin"; //File path for where the compressed file should be
-        String decompressedFilePath = "src/datasets/artificial decompressed"; ///File path for where the decompressed file should be
+        String filePath = ""; //File path for file to be compressed
+        String compressedFilePath = ""; //File path for where the compressed file should be
+        String decompressedFilePath = ""; ///File path for where the decompressed file should be
 
         System.out.println("Process may take a few seconds for large datasets");
 
