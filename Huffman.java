@@ -84,7 +84,7 @@ public class Huffman {
      * @return
      */
     private static String padEncodedText(String encodedText){
-        Huffman.paddingLength = (encodedText.length()) % 7;
+        Huffman.paddingLength = (7 - (encodedText.length()) % 7) + 1;
         StringBuilder encodedTextBuilder = new StringBuilder(encodedText);
         for(int i = 0; i < Huffman.paddingLength; i++){
             encodedTextBuilder.append("0");
@@ -94,8 +94,8 @@ public class Huffman {
 
     /**
      * Method to remove the padding from an encoded text string
-     * @param encodedText
-     * @return
+     * @param encodedText string of bits to remove padding from
+     * @return a substring of the encoded text without the padding bits
      */
     private static String removePadding(String encodedText){
         //Returns a substring of the encoded text that excludes the padding added
@@ -110,7 +110,7 @@ public class Huffman {
     private static byte[] createByteArray(String data){
         data = padEncodedText(data); //Pads the encoded data using the method pad encoded text
         int counter = 0; //Counter of number of bytes written to byte array
-        byte[] byteArray = new byte[data.length() / 7]; //Creates a byte array of siz
+        byte[] byteArray = new byte[(data.length() / 7)];
         for (int i = 7; i < data.length(); i+=7){ //For every 7 string of bits in the entered string
             byte currentByte = Byte.parseByte(data.substring(i - 7, i), 2); //Parse the 7 bits into a byte (maximum number of bits for byte in java)
             byteArray[counter] = currentByte; //Appends the parsed byte into the byte array
@@ -303,9 +303,9 @@ public class Huffman {
 
     public static void main(String[] args) throws IOException {
         //FILE PATHS
-        String filePath = ""; //File path for file to be compressed
-        String compressedFilePath = ""; //File path for where the compressed file should be
-        String decompressedFilePath = ""; ///File path for where the decompressed file should be
+        String filePath = "src/Books/English/King James Bible.txt"; //File path for file to be compressed
+        String compressedFilePath = "src/Books/English/King James Bible.bin"; //File path for where the compressed file should be
+        String decompressedFilePath = "src/Books/English/King James Bible decompressed.txt"; ///File path for where the decompressed file should be
 
         System.out.println("Process may take a few seconds for large datasets");
 
