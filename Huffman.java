@@ -78,61 +78,85 @@ public class Huffman {
         }
     }
 
+    /**
+     *
+     * @param encodedText
+     * @return
+     */
     private static String padEncodedText(String encodedText){
-        Huffman.paddingLength = 8 - (encodedText.length()) % 8;
+        Huffman.paddingLength = (encodedText.length()) % 7;
         StringBuilder encodedTextBuilder = new StringBuilder(encodedText);
         for(int i = 0; i < Huffman.paddingLength; i++){
             encodedTextBuilder.append("0");
         }
-
         return encodedTextBuilder.toString();
     }
 
+    /**
+     * Method to remove the padding from an encoded text string
+     * @param encodedText
+     * @return
+     */
     private static String removePadding(String encodedText){
-        return encodedText.substring(0, (encodedText.length() - Huffman.paddingLength) - 1);
+        //Returns a substring of the encoded text that excludes the padding added
+        return encodedText.substring(0, (encodedText.length() - Huffman.paddingLength));
     }
 
+    /**
+     * Method to create a byte array given a string of binary
+     * @param data string of binary data to convert to byte array
+     * @return byte array equivalent of given data
+     */
     private static byte[] createByteArray(String data){
-        data = padEncodedText(data);
-        int counter = 0;
-        byte[] byteArray = new byte[data.length() / 7];
-        for (int i = 7; i < data.length(); i+=7){
-            byte currentByte = Byte.parseByte(data.substring(i - 7, i), 2);
-            byteArray[counter] = currentByte;
-            if(i % 7 == 0){
-                counter ++;
-            }
+        data = padEncodedText(data); //Pads the encoded data using the method pad encoded text
+        int counter = 0; //Counter of number of bytes written to byte array
+        byte[] byteArray = new byte[data.length() / 7]; //Creates a byte array of siz
+        for (int i = 7; i < data.length(); i+=7){ //For every 7 string of bits in the entered string
+            byte currentByte = Byte.parseByte(data.substring(i - 7, i), 2); //Parse the 7 bits into a byte (maximum number of bits for byte in java)
+            byteArray[counter] = currentByte; //Appends the parsed byte into the byte array
+            counter++; //Adds 1 to the counter of number of string bits converted to byte
         }
         return byteArray;
     }
 
+    /**
+     * Method to write a string of bits to a file as bytes
+     * @param encodedData string of bits to write to file
+     * @param filename name of file to write to
+     */
     private static void writeBitsToFile(String encodedData, String filename){
-        byte[] byteArray = createByteArray(encodedData);
+        byte[] byteArray = createByteArray(encodedData); //Creates a new byte array using the method create byte array
         try(FileOutputStream out = new FileOutputStream(filename)){
-            out.write(byteArray);
-            System.out.println("File successfully compressed and written to: " + filename);
+            out.write(byteArray); //Writes byte array to the file
+            System.out.println("File successfully compressed and written to: " + filename); //Confirmation message
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    /**
+     * Method to read bytes from a file and return them as a String
+     * @param filename name of the file to read bytes from
+     * @return String of ones and zeroes that have been read from the file
+     */
     private static String readBytesFromFile(String filename){
         StringBuilder byteString = new StringBuilder();
         try {
             File file = new File(filename);
-            byte[] bytes = new byte[(int) file.length()];
+            byte[] bytes = new byte[(int) file.length()]; //Creates a new byte array with the length of the number of characters in the file
             DataInputStream input = new DataInputStream(new FileInputStream(file));
-            input.readFully(bytes);
-            input.close();
-            for(int i = 0; i < bytes.length; i++){
-                int indexedCharacter = bytes[i];
-                String format= String.format("%7s", Integer.toBinaryString(indexedCharacter)).replace(' ', '0');
-                byteString.append(format);
+            input.readFully(bytes); //Reads the full file into the byte array
+            input.close(); //Closes the data input stream
+            for(int i = 0; i < bytes.length; i++){ //For every byte in the byte array
+                int indexedCharacter = bytes[i]; //Get the indexed byte
+                //Converts the indexed byte to a binary string with the leading zeroes maintained
+                String stringRepresentation = String.format("%7s", Integer.toBinaryString(indexedCharacter)).replace(' ', '0');
+                byteString.append(stringRepresentation); //Appends the String binary representation of the indexed byte to a string
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        String noPadding = removePadding(byteString.toString());
+        String noPadding = removePadding(byteString.toString()); //Calls a method to remove padding from binary string
         return noPadding;
     }
 
@@ -167,15 +191,15 @@ public class Huffman {
 
     /**
      * Method to encode a given string using codes generated from the huffman tree
-     * @param text
-     * @param codes
-     * @return
+     * @param text data to encode
+     * @param codes table of codes representing each character
+     * @return the encoded String
      */
     private static String encode(String text, String[] codes){
         StringBuilder encodedText = new StringBuilder();
         for(char character : text.toCharArray()){
             try{
-                encodedText.append(codes[character]);
+                encodedText.append(codes[character]); //Append the code representation of the character to the string builder
             }catch (IndexOutOfBoundsException e){
                 continue;
             }
@@ -185,9 +209,9 @@ public class Huffman {
 
     /**
      * Method to decode an encoded text using a given tree
-     * @param encodedText
-     * @param root
-     * @return
+     * @param encodedText text representation of encoded bits
+     * @param root node of the root of the tree
+     * @return decoded string of text
      */
     private static String decode(String encodedText, Node root){
         StringBuilder decodedText = new StringBuilder(); //Creates a new string builder object
@@ -279,9 +303,9 @@ public class Huffman {
 
     public static void main(String[] args) throws IOException {
         //FILE PATHS
-        String filePath = ""; //File path for file to be compressed
-        String compressedFilePath = ""; //File path for where the compressed file should be
-        String decompressedFilePath = ""; ///File path for where the decompressed file should be
+        String filePath = "src/datasets/pseudo-real"; //File path for file to be compressed
+        String compressedFilePath = "src/datasets/pseudo-real.bin"; //File path for where the compressed file should be
+        String decompressedFilePath = "src/datasets/pseudo-real-decompressed"; ///File path for where the decompressed file should be
 
         System.out.println("Process may take a few seconds for large datasets");
 
