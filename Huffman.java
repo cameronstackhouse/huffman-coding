@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 public class Huffman {
     private static final int ALPH_SIZE = 100000; //Number of possible characters, overestimated so that it should work for all languages
-    private static int paddingLength;
+    private static int paddingLength; //Length of the padding needed for an encoded data to make it divisible by 7 so it can be parsed into bytes
 
     /**
      * Method to create a frequency table of all characters given a string input
@@ -28,9 +28,9 @@ public class Huffman {
 
     /**
      * Recursively populates an array with codes representing each character
-     * @param tree
-     * @param code
-     * @param codes
+     * @param tree Huffman tree to traverse through
+     * @param code empty string to add each bit to whilst traversing the tree
+     * @param codes string array of codes representing each character
      */
     private static void getCodes(Node tree, String code, String[] codes){
         if(tree.isLeaf()){ //If the current node is a leaf
@@ -67,11 +67,16 @@ public class Huffman {
         return text.toString(); //Return the scanned data to string
     }
 
+    /**
+    * Method to write a given string of text to a given file
+    * @param text data to be written to the file
+    * @param filename path of the file to write the data to
+    */
     private static void writeToFile(String text, String filename){
         try {
-            BufferedWriter writer = new BufferedWriter(new FileWriter(filename));
-            writer.write(text);
-            writer.close();
+            BufferedWriter writer = new BufferedWriter(new FileWriter(filename)); //Creates a new buffered writer
+            writer.write(text); //Writes the input text into the file
+            writer.close(); 
             System.out.println("Decoded data written to file successfully and written to: " + filename);
         } catch (IOException e) {
             e.printStackTrace();
@@ -79,15 +84,15 @@ public class Huffman {
     }
 
     /**
-     *
-     * @param encodedText
-     * @return
+     * Method to pad the string of encoded text to make the string divisible by 7 to parse to bytes
+     * @param encodedText string representation of the encoded binary data
+     * @return string with padding added
      */
     private static String padEncodedText(String encodedText){
-        Huffman.paddingLength = (7 - (encodedText.length()) % 7) + 1;
-        StringBuilder encodedTextBuilder = new StringBuilder(encodedText);
+        Huffman.paddingLength = (7 - (encodedText.length()) % 7) + 1; //Calculates length of padding needed
+        StringBuilder encodedTextBuilder = new StringBuilder(encodedText); 
         for(int i = 0; i < Huffman.paddingLength; i++){
-            encodedTextBuilder.append("0");
+            encodedTextBuilder.append("0"); //Adds a 0 to the end of the encoded data for the length of the padding needed
         }
         return encodedTextBuilder.toString();
     }
@@ -112,7 +117,7 @@ public class Huffman {
         int counter = 0; //Counter of number of bytes written to byte array
         byte[] byteArray = new byte[(data.length() / 7)];
         for (int i = 7; i < data.length(); i+=7){ //For every 7 string of bits in the entered string
-            byte currentByte = Byte.parseByte(data.substring(i - 7, i), 2); //Parse the 7 bits into a byte (maximum number of bits for byte in java)
+            byte currentByte = Byte.parseByte(data.substring(i - 7, i), 2); //Parse the 7 bits into a byte (maximum number of bits for byte in java as the 8th bit represents the sign)
             byteArray[counter] = currentByte; //Appends the parsed byte into the byte array
             counter++; //Adds 1 to the counter of number of string bits converted to byte
         }
@@ -166,12 +171,14 @@ public class Huffman {
      * @return Node that is the root of the tree
      */
     private static Node constructTree(int[] frequencyTable) {
+        int numOfNodes = 0;
         //Creates a priority queue of nodes, sorted from least frequent to most frequent using the defined comparator
         PriorityQueue<Node> nodes = new PriorityQueue<>();
         for(int i = 0; i < frequencyTable.length; i++){
             if(!(frequencyTable[i] == 0)){ //Checks if the indexed letter appears in the text document
                 Node character = new Node(frequencyTable[i], (char) i); //If so then create a new node
                 nodes.add(character); //Add node to priority queue
+                numOfNodes += 1;
             }
         }
         while (nodes.size() > 1){ //While there are still nodes in the queue to be combined
@@ -181,11 +188,13 @@ public class Huffman {
                 //Creates a parent node which has the frequency of its two child nodes combined. Character of this node is the null character
                 Node combinedNode = new Node(leftNode.getFrequency() + rightNode.getFrequency(), '\u0000', leftNode, rightNode);
                 nodes.add(combinedNode); //Parent node added into priority queue at the correct position for its frequency
+                numOfNodes += 1;
             }catch (NullPointerException e){
                 System.out.println("Ensure number of characters is greater than 0");
                 System.exit(0);
             }
         }
+        System.out.println("Number of nodes: " + numOfNodes);
         return nodes.poll(); //Returns the only node in the queue which is the root node
     }
 
@@ -199,10 +208,12 @@ public class Huffman {
         StringBuilder encodedText = new StringBuilder();
         for(char character : text.toCharArray()){
             try{
-                encodedText.append(codes[character]); //Append the code representation of the character to the string builder
+                if(!(codes[character] == null) || !(codes[character].equals(""))){
+                    encodedText.append(codes[character]); //Append the code representation of the character to the string builder
+                }
             }catch (IndexOutOfBoundsException e){
-                continue;
-            }
+                continue; //If the character is not in the tree then ignore the character
+            } catch (NullPointerException ignore){}
         }
         return encodedText.toString();
     }
@@ -299,14 +310,23 @@ public class Huffman {
                 return Integer.compare(this.letter, otherNode.letter); //Compare based on alphabetical order
             }
         }
+
+        @Override
+        public String toString() {
+            return "Node{" +
+                    "frequency=" + frequency +
+                    ", left=" + left +
+                    ", right=" + right +
+                    ", letter=" + letter +
+                    '}';
+        }
     }
 
     public static void main(String[] args) throws IOException {
         //FILE PATHS
-        String filePath = ""; //File path for file to be compressed
-        String compressedFilePath = ""; //File path for where the compressed file should be
-        String decompressedFilePath = ""; ///File path for where the decompressed file should be
-
+        String filePath = "King James Bible.txt"; //File path for file to be compressed
+        String compressedFilePath = "King James Bible.bin"; //File path for where the compressed file should be
+        String decompressedFilePath = "King James Bible decompressed.txt"; //File path for where the decompressed data should be written to
         System.out.println("Process may take a few seconds for large datasets");
 
         //CREATING HUFFMAN TREE AND CODES
@@ -325,7 +345,7 @@ public class Huffman {
         String decodedData = decode(bitsInCompressedFile, tree); //Decodes the string of bits using the tree
         writeToFile(decodedData, decompressedFilePath); //Writes decoded string to the the file specified in decompressedFilePath
 
-        System.out.println("Is decompressed data the same as the original data?: " + fileData.equals(decodedData));
+        System.out.println("Is decompressed data the same as the original data?: " + fileData.equals(decodedData)); //Displays if the decompressed data matches the original data
     }
 }
 
