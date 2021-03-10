@@ -324,9 +324,9 @@ public class Huffman {
 
     public static void main(String[] args) throws IOException {
         //FILE PATHS
-        String filePath = "King James Bible.txt"; //File path for file to be compressed
-        String compressedFilePath = "King James Bible.bin"; //File path for where the compressed file should be
-        String decompressedFilePath = "King James Bible decompressed.txt"; //File path for where the decompressed data should be written to
+        String filePath = ""; //File path for file to be compressed
+        String compressedFilePath = ""; //File path for where the compressed file should be
+        String decompressedFilePath = ""; //File path for where the decompressed data should be written to
         System.out.println("Process may take a few seconds for large datasets");
 
         //CREATING HUFFMAN TREE AND CODES
