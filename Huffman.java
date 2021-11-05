@@ -8,6 +8,20 @@ public class Huffman {
     private static final int ALPH_SIZE = 100000; //Number of possible characters, overestimated so that it should work for all languages
     private static int paddingLength; //Length of the padding needed for an encoded data to make it divisible by 7 so it can be parsed into bytes
 
+    
+    /**
+     * Method to get the user input for the file path
+     * 
+     * @param message: message to display to the user
+     * @return the input the user entered
+     */
+    public static String getInput(String message){
+        Scanner scan = new Scanner(System.in);
+        System.out.println(message);
+        String input = scan.next();
+        return input;
+    }
+
     /**
      * Method to create a frequency table of all characters given a string input
      *
@@ -324,9 +338,9 @@ public class Huffman {
 
     public static void main(String[] args) throws IOException {
         //FILE PATHS
-        String filePath = ""; //File path for file to be compressed
-        String compressedFilePath = ""; //File path for where the compressed file should be
-        String decompressedFilePath = ""; //File path for where the decompressed data should be written to
+        String filePath = getInput("Enter the file path for the file to be compressed"); //File path for file to be compressed
+        String compressedFilePath = getInput("Enter the file path for where to output the compressed data"); //File path for where the compressed file should be
+        String decompressedFilePath = getInput("Enter the file path for where to output the decompressed data"); //File path for where the decompressed data should be written to
         System.out.println("Process may take a few seconds for large datasets");
 
         //CREATING HUFFMAN TREE AND CODES
